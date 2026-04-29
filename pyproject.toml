@@ -21,7 +21,7 @@ test-command = [
 ]
 
 [tool.cibuildwheel.linux]
-archs = ["x86_64", "aarch64", "i686", "armv7l"]
+archs = ["x86_64", "aarch64", "i686", "armv7l", "riscv64"]
 repair-wheel-command = "auditwheel repair --strip -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.linux.environment]
@@ -39,7 +39,11 @@ select = "*armv7l"
 environment.CFLAGS = "-O3 -g0 -pipe -fPIC"
 
 [[tool.cibuildwheel.overrides]]
-select = "*i686 *musllinux* *win32 *win_arm64 *macosx_x86_64 *armv7l"
+select = "*riscv64"
+environment.CFLAGS = "-O3 -g0 -pipe -fPIC -march=rv64gc"
+
+[[tool.cibuildwheel.overrides]]
+select = "*i686 *musllinux* *win32 *win_arm64 *macosx_x86_64 *armv7l *riscv64"
 inherit.environment = "append"
 environment.CYTHON_LIMITED_API = "true"
 inherit.test-requires = "append"

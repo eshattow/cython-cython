@@ -74,10 +74,11 @@ jobs:
         run: |
           MATRIX=$(
             {
-              cibuildwheel --print-build-identifiers --platform linux --archs "x86_64,aarch64" \
+              cibuildwheel --print-build-identifiers --platform linux --archs "x86_64,aarch64,riscv64" \
               | grep -v musllinux \
               | jq -nRc '{"only": inputs, "os": "ubuntu-latest"}' \
               | sed -e '/aarch64/s|ubuntu-latest|ubuntu-24.04-arm|' \
+              | sed -e '/riscv64/s|ubuntu-latest|ubuntu-24.04-riscv|' \
               && cibuildwheel --print-build-identifiers --platform macos --archs arm64 \
               | jq -nRc '{"only": inputs, "os": "macos-latest"}' \
               && cibuildwheel --print-build-identifiers --platform windows --archs AMD64 \
@@ -117,6 +118,11 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Install extra dependencies for build_wheels
+        if: startsWith( matrix.os, 'ubuntu' )
+        run: |
+          sudo apt update && sudo apt install libffi-dev
+
       - name: Build wheels
         # Nb. dependabot should keep cibuildwheel version pin consistent with generate-matrix job above
         uses: pypa/cibuildwheel@ee02a1537ce3071a004a6b08c41e72f0fdc42d9a # v3.4.0
@@ -150,6 +156,7 @@ jobs:
         os:
           - 'ubuntu-latest'
           - 'ubuntu-24.04-arm'
+          - 'ubuntu-24.04-riscv'
           - 'windows-latest'
           - 'windows-11-arm'
           - 'macos-latest'
@@ -164,6 +171,11 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Install extra dependencies for build_limited_api_wheels
+        if: startsWith( matrix.os, 'ubuntu' )
+        run: |
+          sudo apt update && sudo apt install libffi-dev
+
       - name: Build wheels
         uses: pypa/cibuildwheel@ee02a1537ce3071a004a6b08c41e72f0fdc42d9a # v3.4.0
         env:
@@ -171,6 +183,7 @@ jobs:
           CIBW_BUILD: |
             ${{
                 matrix.os == 'ubuntu-24.04-arm' && '*armv7l *musllinux_aarch64' ||
+                matrix.os == 'ubuntu-24.04-riscv' && '*riscv64 *musllinux_riscv64' ||
                 matrix.os == 'ubuntu-latest' && '*linux_i686 *musllinux_x86_64' ||
                 matrix.os == 'windows-latest' && '*win32' ||
                 matrix.os == 'macos-latest' && '*macosx_x86_64' ||

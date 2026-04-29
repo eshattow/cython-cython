@@ -169,6 +169,13 @@ jobs:
           - os:  windows-11-arm
             python-version: "3.13"
             backend: "cpp"
+          # RISCV64
+          - os: ubuntu-24.04-riscv
+            python-version: "3.13"
+            backend: c
+          - os: ubuntu-24.04-riscv
+            python-version: "3.13"
+            backend: cpp
           # compile all modules
           - os: ubuntu-22.04
             python-version: "3.9"
